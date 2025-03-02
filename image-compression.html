@@ -126,13 +126,38 @@
       font-size: 14px;
       color: rgba(255, 255, 255, 0.8);
     }
-    /* Animations */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    /* Loading Animation */
+    .loader {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid #ff6f61;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+      display: none;
     }
-    .tool-container {
-      animation: fadeIn 1s ease-in-out;
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    /* Responsive Design */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2rem;
+      }
+      .upload-section label {
+        padding: 10px 20px;
+        font-size: 14px;
+      }
+      .compression-level select {
+        padding: 6px 10px;
+        font-size: 14px;
+      }
+      .download-btn {
+        padding: 10px 20px;
+        font-size: 14px;
+      }
     }
   </style>
   <!-- Google Fonts -->
@@ -177,6 +202,7 @@
 
       <!-- Output Section -->
       <div class="output-section">
+        <div class="loader" id="loader"></div>
         <img id="output-image" src="" alt="Compressed Image" style="display:none;">
         <a id="download-btn" class="download-btn" style="display:none;">Download Compressed Image</a>
       </div>
@@ -194,10 +220,16 @@
     const compressionLevel = document.getElementById('compression-level');
     const outputImage = document.getElementById('output-image');
     const downloadBtn = document.getElementById('download-btn');
+    const loader = document.getElementById('loader');
 
     imageUpload.addEventListener('change', function (e) {
       const file = e.target.files[0];
       if (file) {
+        // Show loader
+        loader.style.display = 'block';
+        outputImage.style.display = 'none';
+        downloadBtn.style.display = 'none';
+
         const reader = new FileReader();
         reader.onload = function (event) {
           const img = new Image();
@@ -219,6 +251,7 @@
       let width = img.width;
       let height = img.height;
 
+      // Calculate new dimensions while maintaining aspect ratio
       if (width > height) {
         if (width > maxWidth) {
           height *= maxWidth / width;
@@ -234,14 +267,24 @@
       canvas.width = width;
       canvas.height = height;
 
+      // Draw image on canvas
       ctx.drawImage(img, 0, 0, width, height);
 
+      // Get compression quality
       const quality = parseFloat(compressionLevel.value);
+
+      // Convert canvas to Blob
       canvas.toBlob(
         function (blob) {
+          // Hide loader
+          loader.style.display = 'none';
+
+          // Display compressed image
           const compressedUrl = URL.createObjectURL(blob);
           outputImage.src = compressedUrl;
           outputImage.style.display = 'block';
+
+          // Enable download button
           downloadBtn.href = compressedUrl;
           downloadBtn.download = `compressed-image-${quality}.jpg`;
           downloadBtn.style.display = 'block';
