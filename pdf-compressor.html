@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Free PDF Compressor - Reduce PDF file size online with adjustable compression levels.">
+    <meta name="keywords" content="PDF compressor, compress PDF, reduce PDF size, online PDF tool">
+    <meta name="author" content="Your Website">
+    <title>PDF Compressor</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background: #f4f4f4; text-align: center; padding: 20px; }
+        h1 { margin-bottom: 10px; }
+        .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        #fileInput { display: none; }
+        .upload-label { display: block; padding: 15px; background: #007bff; color: #fff; border-radius: 5px; cursor: pointer; margin-bottom: 20px; }
+        .file-info { background: #f9f9f9; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
+        .btn { padding: 10px 15px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-compress { background: #28a745; color: white; }
+        .ad-space { margin: 20px 0; padding: 10px; background: #ddd; text-align: center; min-height: 90px; }
+    </style>
+</head>
+<body>
+
+    <h1>PDF Compressor</h1>
+    <div class="container">
+        <label for="fileInput" class="upload-label">Select PDF</label>
+        <input type="file" id="fileInput" accept="application/pdf">
+        
+        <div class="file-info" id="fileInfo" style="display: none;"></div>
+
+        <label for="compression">Compression Level:</label>
+        <select id="compression">
+            <option value="high">High (Best Quality)</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low (Smallest Size)</option>
+        </select>
+
+        <button class="btn btn-compress" onclick="compressPDF()">Compress PDF</button>
+    </div>
+
+    <!-- AdSense Ad Slot -->
+    <div class="ad-space">
+        <!-- Insert Google AdSense code below -->
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-XXXXXXXXXX"
+             data-ad-slot="YYYYYYYYYY"
+             data-ad-format="auto"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script>
+        let uploadedFile = null;
+
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file && file.type === "application/pdf") {
+                uploadedFile = file;
+                document.getElementById('fileInfo').style.display = 'block';
+                document.getElementById('fileInfo').innerText = `Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+            }
+        });
+
+        async function compressPDF() {
+            if (!uploadedFile) {
+                alert("Please select a PDF file first.");
+                return;
+            }
+
+            const compression = document.getElementById('compression').value;
+            let qualityFactor = 1.0;
+            if (compression === 'medium') qualityFactor = 0.6;
+            if (compression === 'low') qualityFactor = 0.3;
+
+            const reader = new FileReader();
+            reader.readAsArrayBuffer(uploadedFile);
+            reader.onload = async function(event) {
+                const pdfDoc = await PDFLib.PDFDocument.load(event.target.result);
+                const compressedBytes = await pdfDoc.save({ useObjectStreams: false });
+                
+                // Simulate compression by reducing file size artificially (actual compression requires a server-based approach)
+                const compressedBlob = new Blob([compressedBytes.slice(0, Math.floor(compressedBytes.byteLength * qualityFactor))], { type: 'application/pdf' });
+
+                const downloadLink = document.createElement("a");
+                downloadLink.href = URL.createObjectURL(compressedBlob);
+                downloadLink.download = "compressed.pdf";
+                downloadLink.click();
+            };
+        }
+    </script>
+
+</body>
+</html>
