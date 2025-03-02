@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Convert images to PDF online. Free tool to create PDFs from images with compression options.">
+    <meta name="keywords" content="images to pdf, convert images, pdf converter, online tool">
+    <meta name="author" content="Your Website">
+    <title>Images to PDF Converter</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background: #f4f4f4; text-align: center; padding: 20px; }
+        h1 { margin-bottom: 10px; }
+        .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        #fileInput { display: none; }
+        .upload-label { display: block; padding: 15px; background: #007bff; color: #fff; border-radius: 5px; cursor: pointer; margin-bottom: 20px; }
+        .image-list { list-style: none; padding: 0; }
+        .image-list li { display: flex; align-items: center; background: #f9f9f9; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
+        .image-list img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; margin-right: 10px; }
+        .btn { padding: 10px 15px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-remove { background: #dc3545; color: white; }
+        .btn-convert { background: #28a745; color: white; }
+        .ad-space { margin: 20px 0; padding: 10px; background: #ddd; text-align: center; min-height: 90px; }
+    </style>
+</head>
+<body>
+
+    <h1>Images to PDF Converter</h1>
+    <div class="container">
+        <label for="fileInput" class="upload-label">Select Images</label>
+        <input type="file" id="fileInput" multiple accept="image/*">
+        
+        <ul class="image-list" id="imageList"></ul>
+
+        <label for="compression">Compression Level:</label>
+        <select id="compression">
+            <option value="high">High (Best Quality)</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low (Smallest Size)</option>
+        </select>
+
+        <button class="btn btn-convert" onclick="convertToPDF()">Convert to PDF</button>
+    </div>
+
+    <!-- AdSense Ad Slot -->
+    <div class="ad-space">
+        <!-- Insert Google AdSense code below -->
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-XXXXXXXXXX"
+             data-ad-slot="YYYYYYYYYY"
+             data-ad-format="auto"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        let images = [];
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const files = event.target.files;
+            for (let file of files) {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = function(e) {
+                    images.push({ src: e.target.result, name: file.name });
+                    updateImageList();
+                };
+            }
+        });
+
+        function updateImageList() {
+            const imageList = document.getElementById('imageList');
+            imageList.innerHTML = '';
+            images.forEach((image, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <img src="${image.src}" alt="${image.name}">
+                    <span>${image.name}</span>
+                    <button class="btn btn-remove" onclick="removeImage(${index})">Remove</button>
+                `;
+                imageList.appendChild(li);
+            });
+        }
+
+        function removeImage(index) {
+            images.splice(index, 1);
+            updateImageList();
+        }
+
+        function convertToPDF() {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+            const compression = document.getElementById('compression').value;
+            let quality = 1.0;
+            if (compression === 'medium') quality = 0.6;
+            if (compression === 'low') quality = 0.3;
+
+            images.forEach((image, i) => {
+                const img = new Image();
+                img.src = image.src;
+                img.onload = function() {
+                    const width = pdf.internal.pageSize.getWidth();
+                    const height = (img.height / img.width) * width;
+                    if (i > 0) pdf.addPage();
+                    pdf.addImage(img, 'JPEG', 0, 0, width, height, '', quality);
+                    if (i === images.length - 1) pdf.save('converted.pdf');
+                };
+            });
+        }
+    </script>
+
+</body>
+</html>
